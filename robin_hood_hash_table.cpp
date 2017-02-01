@@ -1,8 +1,20 @@
-#include <iostream>;
+#include <iostream>
 using namespace std;
 
 #define INITIAL_CAPACITY 256
 #define LOAD_FACTOR_LIMIT 0.9
+
+typedef struct entry {
+    int key;
+    int value;
+
+    entry() {
+        key = 0;
+        value = 0;
+    }
+
+    entry(int k, int v) : key(k), value(v) {}
+} entry;
 
 typedef struct bucket {
     entry data;
@@ -17,18 +29,6 @@ typedef struct bucket {
 
     bucket(entry e, int pl) : data(e), probe_length(pl), flag("FULL") {}
 } bucket;
-
-typedef struct entry {
-    int key;
-    int value;
-
-    entry() {
-        key = 0;
-        value = 0;
-    }
-
-    entry(int k, int v) : key(k), value(v) {}
-} entry;
 
 class robin_hood_hash_table {
     private:
@@ -81,7 +81,7 @@ class robin_hood_hash_table {
 
             entry new_entry (key, value);
             bucket curr_bucket (new_entry, 0);
-            int curr_index = find_slot(curr_bucket.entry.key);
+            int curr_index = find_slot(curr_bucket.data.key);
 
             //linear probe for an empty bucket in the table
             while (table[curr_index].flag != "EMPTY" || table[curr_index].flag != "DEL"){
@@ -131,6 +131,4 @@ class robin_hood_hash_table {
                 return table[curr_index].entry.value;
             }
         }
-
-
 };
