@@ -1,4 +1,5 @@
 #include <iostream>
+
 using namespace std;
 
 #define INITIAL_CAPACITY 256
@@ -69,10 +70,20 @@ class robin_hood_hash_table {
     public:
         robin_hood_hash_table() {
             num_buckets = INITIAL_CAPACITY;
+            num_elements = 0;
             table = new bucket[num_buckets];
             for(int i = 0; i < num_buckets; i++) {
                 table[i] = bucket();
             }
+        }
+
+        void print_table() {
+            cout << "num_elements: " << num_elements << endl;
+            cout << "num_buckets: " << num_buckets << endl;
+            for(int i = 0; i < num_buckets; i++) {
+                cout << "key: " << table[i].data.key << " val: " << table[i].data.value << " pl: " << table[i].probe_length << " flag: " << table[i].flag << endl;
+            }
+            cout << "............................................." << endl;
         }
 
         void insert(int key, int value) {
@@ -85,7 +96,7 @@ class robin_hood_hash_table {
             int curr_index = find_slot(curr_bucket.data.key);
 
             //linear probe for an empty bucket in the table
-            while (table[curr_index].flag != "EMPTY" || table[curr_index].flag != "DEL") {
+            while (table[curr_index].flag != "EMPTY" && table[curr_index].flag != "DEL") {
                 //move entry based on probe length
                 if (curr_bucket.probe_length > table[curr_index].probe_length) {
                     swap_buckets(&curr_bucket, &table[curr_index]);
@@ -135,5 +146,42 @@ class robin_hood_hash_table {
 };
 
 int main() {
+    robin_hood_hash_table rh;
 
-}
+    //testing insert
+    // rh.insert(1, 2);
+    // rh.print_table();
+    // rh.insert(3, 4);
+    // rh.print_table();
+    // rh.insert(5, 6);
+    // rh.print_table();
+    // rh.insert(7, 8);
+    // rh.print_table();
+    //
+    // //testing retrieve
+    // cout << rh.retrieve(1) << endl;
+    // cout << rh.retrieve(3) << endl;
+    // cout << rh.retrieve(5) << endl;
+    // cout << rh.retrieve(7) << endl;
+    //
+    // //testing delete
+    //
+    // //// deleting nonexistent; expect false;
+    // bool not_there = rh.delete_entry(111);
+    // cout << not_there << endl;
+    //
+    // bool there = rh.delete_entry(7);
+    // cout << there << endl;
+    //
+    // rh.print_table();
+
+    for(int i = 0; i < 100; i++) {
+      if(i % 2 == 0) {
+        rh.insert(1,2);
+      }
+      else {
+        rh.insert(3, 4);
+      }
+    }
+    rh.print_table();
+};
