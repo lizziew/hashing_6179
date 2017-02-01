@@ -85,9 +85,9 @@ class robin_hood_hash_table {
             int curr_index = find_slot(curr_bucket.data.key);
 
             //linear probe for an empty bucket in the table
-            while (table[curr_index].flag != "EMPTY" || table[curr_index].flag != "DEL"){
+            while (table[curr_index].flag != "EMPTY" || table[curr_index].flag != "DEL") {
                 //move entry based on probe length
-                if (curr_bucket.probe_length > table[curr_index].probe_length){
+                if (curr_bucket.probe_length > table[curr_index].probe_length) {
                     swap_buckets(&curr_bucket, &table[curr_index]);
                 }
 
@@ -101,7 +101,7 @@ class robin_hood_hash_table {
             num_elements += 1;
         }
 
-        bool delete(int key) {
+        bool delete_entry(int key) {
             int curr_index = -1;
 
             for(int i = find_slot(key); i < num_buckets; i++) {
