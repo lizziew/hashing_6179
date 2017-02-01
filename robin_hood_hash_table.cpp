@@ -8,7 +8,7 @@ using namespace std;
 
 #define INITIAL_CAPACITY 256
 #define LOAD_FACTOR_LIMIT 0.9
-#define TEST_COUNT 100
+#define TEST_COUNT 10000
 
 typedef struct entry {
     int key;
@@ -43,8 +43,14 @@ class robin_hood_hash_table {
         int num_elements;
 
         int find_slot(int key) {
-            //quick way to take mod of power of 2
-            return hash<int>()(key) & (num_buckets - 1);
+          key = (key ^ 61) ^ (key >> 16);
+          key = key + (key << 3);
+          key = key ^ (key>> 4);
+          key = key * 0x27d4eb2d;
+          key = key ^ (key >> 15);
+
+          //quick way to take mod of power of 2
+          return key & (num_buckets - 1);
         }
 
         void double_table() {
@@ -75,6 +81,7 @@ class robin_hood_hash_table {
     public:
         robin_hood_hash_table() {
             num_buckets = INITIAL_CAPACITY;
+            num_elements = 0;
             table = new bucket[num_buckets];
             for(int i = 0; i < num_buckets; i++) {
                 table[i] = bucket();
@@ -85,8 +92,9 @@ class robin_hood_hash_table {
             cout << "num_elements: " << num_elements << endl;
             cout << "num_buckets: " << num_buckets << endl;
             for(int i = 0; i < num_buckets; i++) {
-                cout << "key: " << table[i].data.key << "val: " << table[i].data.value << "pl: " << table[i].probe_length << "flag: " << table[i].flag << endl;
+                cout << "key: " << table[i].data.key << " val: " << table[i].data.value << " pl: " << table[i].probe_length << " flag: " << table[i].flag << endl;
             }
+            cout << "..................................." << endl;
         }
 
         void insert(int key, int value) {
@@ -99,7 +107,7 @@ class robin_hood_hash_table {
             int curr_index = find_slot(curr_bucket.data.key);
 
             //linear probe for an empty bucket in the table
-            while (table[curr_index].flag != "EMPTY" && table[curr_index].flag != "DEL") {
+            while (table[curr_index].flag != "EMPTY" && table[curr_index].flag != "DEL" && curr_index < num_buckets) {
                 //move entry based on probe length
                 if (curr_bucket.probe_length > table[curr_index].probe_length) {
                     swap_buckets(&curr_bucket, &table[curr_index]);
@@ -173,7 +181,7 @@ int main() {
               << " nanoseconds" << endl;
 
   //testing rand input
-  cout << "TESTING ON SORTED INPUT FROM [0, 100K)" << endl;
+  cout << "TESTING ON UNSORTED INPUT FROM [0, 100K)" << endl;
   t1 = Clock::now();
   for(int i = 0; i < TEST_COUNT; i++) {
     rh.insert(rand() % TEST_COUNT, rand() % TEST_COUNT);
