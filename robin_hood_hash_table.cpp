@@ -1,9 +1,14 @@
 #include <iostream>
+#include <cassert>
+#include <chrono>
+typedef std::chrono::high_resolution_clock Clock;
+#include <unordered_map>
 
 using namespace std;
 
 #define INITIAL_CAPACITY 256
 #define LOAD_FACTOR_LIMIT 0.9
+#define TEST_COUNT 100
 
 typedef struct entry {
     int key;
@@ -70,7 +75,6 @@ class robin_hood_hash_table {
     public:
         robin_hood_hash_table() {
             num_buckets = INITIAL_CAPACITY;
-            num_elements = 0;
             table = new bucket[num_buckets];
             for(int i = 0; i < num_buckets; i++) {
                 table[i] = bucket();
@@ -81,9 +85,8 @@ class robin_hood_hash_table {
             cout << "num_elements: " << num_elements << endl;
             cout << "num_buckets: " << num_buckets << endl;
             for(int i = 0; i < num_buckets; i++) {
-                cout << "key: " << table[i].data.key << " val: " << table[i].data.value << " pl: " << table[i].probe_length << " flag: " << table[i].flag << endl;
+                cout << "key: " << table[i].data.key << "val: " << table[i].data.value << "pl: " << table[i].probe_length << "flag: " << table[i].flag << endl;
             }
-            cout << "............................................." << endl;
         }
 
         void insert(int key, int value) {
@@ -146,42 +149,83 @@ class robin_hood_hash_table {
 };
 
 int main() {
-    robin_hood_hash_table rh;
+  robin_hood_hash_table rh;
+  unordered_map<int, int> m;
 
-    //testing insert
-    // rh.insert(1, 2);
-    // rh.print_table();
-    // rh.insert(3, 4);
-    // rh.print_table();
-    // rh.insert(5, 6);
-    // rh.print_table();
-    // rh.insert(7, 8);
-    // rh.print_table();
-    //
-    // //testing retrieve
-    // cout << rh.retrieve(1) << endl;
-    // cout << rh.retrieve(3) << endl;
-    // cout << rh.retrieve(5) << endl;
-    // cout << rh.retrieve(7) << endl;
-    //
-    // //testing delete
-    //
-    // //// deleting nonexistent; expect false;
-    // bool not_there = rh.delete_entry(111);
-    // cout << not_there << endl;
-    //
-    // bool there = rh.delete_entry(7);
-    // cout << there << endl;
-    //
-    // rh.print_table();
+  //testing sorted insert
+  cout << "TESTING ON SORTED INPUT FROM [0, 100K)" << endl;
+  auto t1 = Clock::now();
+  for(int i = 0; i < TEST_COUNT; i++) {
+    rh.insert(i, i+1);
+  }
+  auto t2 = Clock::now();
+  cout << "rh: "
+              << chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count()
+              << " nanoseconds" << endl;
 
-    for(int i = 0; i < 100; i++) {
-      if(i % 2 == 0) {
-        rh.insert(1,2);
-      }
-      else {
-        rh.insert(3, 4);
-      }
-    }
-    rh.print_table();
+  t1 = Clock::now();
+  for(int i = 0; i < TEST_COUNT; i++) {
+    m.insert(make_pair(i, i+1));
+  }
+  t2 = Clock::now();
+  cout << "std: "
+              << chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count()
+              << " nanoseconds" << endl;
+
+  //testing rand input
+  cout << "TESTING ON SORTED INPUT FROM [0, 100K)" << endl;
+  t1 = Clock::now();
+  for(int i = 0; i < TEST_COUNT; i++) {
+    rh.insert(rand() % TEST_COUNT, rand() % TEST_COUNT);
+  }
+  t2 = Clock::now();
+  cout << "rh: "
+              << chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count()
+              << " nanoseconds" << endl;
+
+  t1 = Clock::now();
+  for(int i = 0; i < TEST_COUNT; i++) {
+    m.insert(make_pair(rand() % TEST_COUNT, rand() % TEST_COUNT));
+  }
+  t2 = Clock::now();
+  cout << "std: "
+              << chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count()
+              << " nanoseconds" << endl;
+
+  //testing retrieve
+  // time(&timer);
+  // cout << rh.retrieve(1) << endl;
+  // seconds = difftime(timer,mktime(&y2k));
+  // cout << seconds << endl;
+  //
+  // time(&timer);
+  // cout << rh.retrieve(3) << endl;
+  // seconds = difftime(timer,mktime(&y2k));
+  // cout << seconds << endl;
+  //
+  // time(&timer);
+  // cout << rh.retrieve(5) << endl;
+  // seconds = difftime(timer,mktime(&y2k));
+  // cout << seconds << endl;
+  //
+  // time(&timer);
+  // cout << rh.retrieve(7) << endl;
+  // seconds = difftime(timer,mktime(&y2k));
+  // cout << seconds << endl;
+
+
+  //testing delete
+
+  //// deleting nonexistent; expect false;
+  // time(&timer);
+  // bool not_there = rh.delete_entry(111);
+  // seconds = difftime(timer,mktime(&y2k));
+  // cout << seconds << endl;
+  // assert(!not_there);
+  //
+  // time(&timer);
+  // bool there = rh.delete_entry(7);
+  // seconds = difftime(timer,mktime(&y2k));
+  // cout << seconds << endl;
+  // assert(there);
 };
