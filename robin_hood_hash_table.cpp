@@ -35,12 +35,10 @@ class robin_hood_hash_table {
         bucket table[INITIAL_CAPACITY];
         int num_buckets;
         int num_elements;
-        const hash<int> hasher;
 
         int find_slot(int key) {
-            int hash = hasher(key);
             //quick way to take mod of power of 2
-            return hash & (num_buckets - 1);
+            return hash<int>()(key) & (num_buckets - 1);
         }
 
         void double_table() {
