@@ -32,7 +32,7 @@ typedef struct bucket {
 
 class robin_hood_hash_table {
     private:
-        bucket table[INITIAL_CAPACITY];
+        bucket* table;
         int num_buckets;
         int num_elements;
 
@@ -42,20 +42,22 @@ class robin_hood_hash_table {
         }
 
         void double_table() {
-            int new_num_buckets = num_buckets*2;
-            int new_num_elements = 0;
-            bucket new_table[new_num_buckets];
+            int original_num_buckets = num_buckets;
+            num_buckets *= 2;
 
-            for(int i = 0; i < num_buckets; i++) {
+            bucket *old_table = table;
+            table = new bucket[num_buckets];
+
+            num_elements = 0;
+
+            for(int i = 0; i < original_num_buckets; i++) {
                 if(table[i].flag != "DEL") {
-                    new_table[i] = table[i];
-                    new_num_elements++;
+                    table[i] = old_table[i];
+                    num_elements++;
                 }
             }
 
-            table = new_table;
-            num_buckets = new_num_buckets;
-            num_elements = new_num_elements;
+            delete [] old_table;
         }
 
         void swap_buckets(bucket* a, bucket* b) {
@@ -67,6 +69,7 @@ class robin_hood_hash_table {
     public:
         robin_hood_hash_table() {
             num_buckets = INITIAL_CAPACITY;
+            table = new bucket[num_buckets];
             for(int i = 0; i < num_buckets; i++) {
                 table[i] = bucket();
             }
