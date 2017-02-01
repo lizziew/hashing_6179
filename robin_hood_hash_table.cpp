@@ -105,7 +105,7 @@ class robin_hood_hash_table {
             int curr_index = -1;
 
             for(int i = find_slot(key); i < num_buckets; i++) {
-                if(table[i].entry.key == key) {
+                if(table[i].data.key == key) {
                     curr_index = i;
                     table[i].flag = "DEL";
                     num_elements -= 1;
@@ -120,7 +120,7 @@ class robin_hood_hash_table {
             int curr_index = -1;
 
             for(int i = find_slot(key); i < num_buckets; i++) {
-                if(table[i].entry.key == key) {
+                if(table[i].data.key == key) {
                     curr_index = i;
                     break;
                 }
@@ -129,7 +129,11 @@ class robin_hood_hash_table {
                 //throw exception if we can't find key
                 throw invalid_argument( "couldn't find value stored at key" );
             } else {
-                return table[curr_index].entry.value;
+                return table[curr_index].data.value;
             }
         }
 };
+
+int main() {
+
+}
