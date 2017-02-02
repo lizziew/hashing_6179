@@ -26,3 +26,8 @@ http://people.csail.mit.edu/shanir/publications/disc2008_submission_98.pdf
 - Other
   - Inserting sorted inputs 1...100k VS inserting 100k unsorted inputs
   - Retrieve elements not in the hashtable 
+
+## Benchmark results
+![90 5 5](images/9055.png)
+![80 10 10](images/801010.png)
+![60 20 20](images/602020.png)
