@@ -49,7 +49,6 @@ class robin_hood_hash_table {
     int num_elements;
 
     int find_slot(int key) {
-      return key & (num_buckets - 1);
       key = (key ^ 61) ^ (key >> 16);
       key = key + (key << 3);
       key = key ^ (key>> 4);
