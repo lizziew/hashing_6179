@@ -60,7 +60,7 @@ class robin_hood_hash_table {
       return key & (num_buckets - 1);
     }
 
-    void double_table() {
+    void resize_table() {
       int original_num_buckets = num_buckets;
       num_buckets *= 2;
 
@@ -110,7 +110,7 @@ class robin_hood_hash_table {
 
     void insert(int key, int value) {
       if (num_elements + 1 >= LOAD_FACTOR_LIMIT * num_buckets) {
-        double_table();
+        resize_table();
       }
 
       entry new_entry (key, value);
