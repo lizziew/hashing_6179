@@ -26,18 +26,20 @@ typedef struct entry {
   entry(int k, int v) : key(k), value(v) {}
 } entry;
 
+enum bucket_flag {DEL, EMPTY, FULL};
+
 typedef struct bucket {
   entry data;
   int probe_length;
-  string flag; //"DEL" "EMPTY" "FULL"
+  bucket_flag flag;
 
   bucket() {
     data = entry();
     probe_length = 0;
-    flag = "EMPTY";
+    flag = EMPTY;
   }
 
-  bucket(entry e, int pl) : data(e), probe_length(pl), flag("FULL") {}
+  bucket(entry e, int pl) : data(e), probe_length(pl), flag(FULL) {}
 } bucket;
 
 class robin_hood_hash_table {
@@ -68,7 +70,7 @@ class robin_hood_hash_table {
       num_elements = 0;
 
       for(int i = 0; i < original_num_buckets; i++) {
-        if(table[i].flag != "DEL") {
+        if(table[i].flag != DEL) {
           table[i] = old_table[i];
           num_elements++;
         }
@@ -116,7 +118,7 @@ class robin_hood_hash_table {
       int curr_index = find_slot(curr_bucket.data.key);
 
       //linear probe for an empty bucket in the table
-      while (table[curr_index].flag != "EMPTY" && table[curr_index].flag != "DEL" && curr_index < num_buckets) {
+      while (table[curr_index].flag != EMPTY && table[curr_index].flag != DEL && curr_index < num_buckets) {
         //move entry based on probe length
         if (curr_bucket.probe_length > table[curr_index].probe_length) {
           swap_buckets(&curr_bucket, &table[curr_index]);
@@ -138,7 +140,7 @@ class robin_hood_hash_table {
       for(int i = find_slot(key); i < num_buckets; i++) {
         if(table[i].data.key == key) {
           curr_index = i;
-          table[i].flag = "DEL";
+          table[i].flag = DEL;
           num_elements -= 1;
           break;
         }
@@ -156,7 +158,7 @@ class robin_hood_hash_table {
           break;
         }
       }
-      
+
       return curr_index == -1;
     }
 
@@ -184,8 +186,8 @@ int geometric_sum(int base, int magnitude) {
 
 /**
  * Benchmark the robin hood hashtable against std::unordered_map. For each magnitude i, base^i operations
- * are performed, logging results for each magnitude. The expected proportion of operations that 
- * are insertions is prob_insert, and the expected proportion of operations that are deletions 
+ * are performed, logging results for each magnitude. The expected proportion of operations that
+ * are insertions is prob_insert, and the expected proportion of operations that are deletions
  * is prob_delete. The rest of the operations are contains. All queried keys and values are integers.
  * The operation types are randomly ordered and decided beforehand for both hashtable implementations.
 */
@@ -287,7 +289,7 @@ int main() {
   /*
     robin_hood_hash_table rh;
     unordered_map<int, int> m;
-  
+
     //testing sorted insert
     cout << "TESTING ON SORTED INPUT FROM [0, 100K)" << endl;
     auto t1 = Clock::now();
@@ -298,7 +300,7 @@ int main() {
     cout << "rh: "
                 << chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count()
                 << " nanoseconds" << endl;
-  
+
     t1 = Clock::now();
     for(int i = 0; i < TEST_COUNT; i++) {
       m.insert(make_pair(i, i+1));
@@ -307,7 +309,7 @@ int main() {
     cout << "std: "
                 << chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count()
                 << " nanoseconds" << endl;
-  
+
     //testing rand input
     cout << "TESTING ON UNSORTED INPUT FROM [0, 100K)" << endl;
     t1 = Clock::now();
@@ -318,7 +320,7 @@ int main() {
     cout << "rh: "
                 << chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count()
                 << " nanoseconds" << endl;
-  
+
     t1 = Clock::now();
     for(int i = 0; i < TEST_COUNT; i++) {
       m.insert(make_pair(rand() % TEST_COUNT, rand() % TEST_COUNT));
@@ -327,7 +329,7 @@ int main() {
     cout << "std: "
                 << chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count()
                 << " nanoseconds" << endl;
-  
+
     //testing retrieve
     // time(&timer);
     // cout << rh.retrieve(1) << endl;
@@ -348,10 +350,10 @@ int main() {
     // cout << rh.retrieve(7) << endl;
     // seconds = difftime(timer,mktime(&y2k));
     // cout << seconds << endl;
-  
-  
+
+
     //testing delete
-  
+
     //// deleting nonexistent; expect false;
     // time(&timer);
     // bool not_there = rh.delete_entry(111);
